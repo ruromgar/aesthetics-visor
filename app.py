@@ -6,6 +6,7 @@ import streamlit as st
 
 from visor.constants import IMAGE_FOLDER
 from visor.constants import METADATA_FILE
+from visor.mcp_client import MCPImageSearchClient
 from visor.models import Metadata
 from visor.utils import get_visible_images
 from visor.utils import save_metadata
@@ -72,10 +73,24 @@ with col1:
 
 with col2:
     if st.button("🔍 Buscar con agente"):
-        with st.spinner("Consultando agente..."):
-            suggestion = None  # run_agent_pipeline(img_path)
-            st.session_state.suggested_meta = suggestion
+        with st.spinner("Consultando MCP Agent..."):
+            try:
+                client = MCPImageSearchClient()
+                suggestion = client.fetch_metadata_with_agent(img_path)
+                print(f"Suggested metadata: {suggestion}")
+                st.session_state.suggested_meta = None
+            except Exception as err:
+                st.error(f"Agente falló: {err}")
     with st.form(key="edit_form"):
+        if "suggested_meta" in st.session_state and st.session_state.suggested_meta:
+            sm = st.session_state.suggested_meta
+            with st.expander("Proposed metadata", expanded=True):
+                st.json(asdict(sm))
+                if st.button("✅ Accept suggestion"):
+                    save_metadata(selected_image, sm, df)
+                    st.success("Metadata imported!")
+                    del st.session_state["suggested_meta"]
+
         current_metadata = Metadata(**df.loc[selected_image].fillna("").to_dict())
 
         st.markdown(f"##### Filename: {selected_image}")
@@ -107,7 +122,7 @@ with col2:
             )
             save_metadata(selected_image, updated_metadata, df)
             st.success("Metadata saved!")
-        if 'suggested_meta' in st.session_state:
+        if 'suggested_meta' in st.session_state and st.session_state.suggested_meta:
             sugg = st.session_state.suggested_meta
             with st.expander("Proposed metadata", expanded=True):
                 st.json(asdict(sugg))

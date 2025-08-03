@@ -28,13 +28,16 @@ def gallery(request):
 def edit_metadata(request, filename):
     meta, _ = Metadata.objects.get_or_create(filename=filename)
     if request.method == "POST":
-        print(request.POST)
         form = MetadataForm(request.POST, instance=meta)
-        print(form.errors)
+        print(f"Form data: {request.POST}")
+        print("Form errors:", form.errors)
         if form.is_valid():
             form.save()
             return HttpResponse(status=200, content="OK")
     else:
         form = MetadataForm(instance=meta)
-    return render(request, "_metadata_form.html",
-                  {"form": form, "filename": filename})
+    return render(
+        request,
+        "_metadata_form.html",
+        {"form": form, "filename": filename}
+    )

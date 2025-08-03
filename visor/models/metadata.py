@@ -5,6 +5,7 @@ from visor.models.tag import Tag
 
 
 class Metadata(models.Model):
+    id = models.AutoField(primary_key=True)
     filename = models.CharField(max_length=255, unique=True)
     title = models.CharField(max_length=255)
     author = models.CharField(max_length=255)
@@ -14,6 +15,9 @@ class Metadata(models.Model):
     museum = models.CharField(max_length=255, blank=True)
     material = models.CharField(max_length=255, blank=True)
     source = models.URLField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def get_absolute_url(self):
         return reverse("visor:edit", args=[self.filename])

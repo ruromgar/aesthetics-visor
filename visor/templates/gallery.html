@@ -3,10 +3,12 @@
 {% block title %}Gallery - Aesthetics{% endblock %}
 
 {% block content %}
-  <h1 class="text-3xl font-semibold mb-6 text-center">✨ Aesthetics Catalog</h1>
 
-<!-- refresh signal target -->
-  <div id="gallery">
+  <div id="gallery"
+       hx-get="{% url 'visor:gallery' %}"
+       hx-trigger="refresh from:body"
+       hx-swap="outerHTML">
+    <h1 class="text-3xl font-semibold mb-6 text-center">✨ Aesthetics Catalog</h1>
     <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {% for file in files %}
         <div class="rounded shadow bg-white p-2 flex flex-col">
@@ -28,24 +30,29 @@
   <div id="modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center"></div>
 
   <script>
-      /* Toggle modal visibility when content is injected */
     document.body.addEventListener("htmx:afterOnLoad", (evt) => {
       if (evt.detail.target.id === "modal") {
-        document.getElementById("modal").classList.remove("hidden");
+        if (evt.detail.xhr.responseText === "OK") return;
+        const modal = document.getElementById('modal');
+        if (modal) {
+          modal.classList.remove('hidden');
+        }
       }
     });
-      /* Hide modal on successful POST (status 200 + 'OK') */
+
     document.body.addEventListener("htmx:afterSwap", (evt) => {
-      if (e.detail.target.id === "modal") {
-        djangoSelect2.initializeAll();
-      }
-      else if (evt.detail.target.id === "modal" && evt.detail.xhr.status === 200 &&
-        evt.detail.xhr.responseText === "OK") {
-          evt.detail.target.innerHTML = "";
-          document.getElementById("modal").classList.add("hidden");
-          /* trigger gallery refresh */
-          htmx.trigger(htmx.find("#gallery"), "refresh");
+      if (
+        evt.detail.target.id === "modal" &&
+        evt.detail.xhr.status === 200 &&
+        evt.detail.xhr.responseText === "OK"
+      ) {
+        const modal = document.getElementById("modal");
+        if (modal) {
+          modal.classList.add("hidden");
+          modal.innerHTML = "";
         }
+        htmx.trigger(document.body, "refresh");
+      }
     });
   </script>
 {% endblock %}

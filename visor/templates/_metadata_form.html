@@ -1,0 +1,78 @@
+{% load static %}
+{% load django_bootstrap5 %}
+
+<div id="metaModal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+                           bg-white rounded-lg shadow-lg max-w-6xl w-[90vw] h-[95vh]
+                           overflow-y-auto p-6">
+  <h2 class="text-xl font-semibold mb-4"><code>{{ filename }}</code></h2>
+
+  {{ form.media }}
+
+  <div class="flex flex-col md:flex-row gap-4">
+    <!-- LEFT: Image -->
+    <div class="md:w-1/2 w-full">
+      <img src="{{ MEDIA_URL }}{{ filename }}"
+           alt="{{ filename }}"
+           class="w-full rounded shadow object-contain max-h-[80vh]" />
+    </div>
+
+    <!-- RIGHT: Metadata form -->
+    <div class="md:w-1/2 w-full">
+      <form
+        hx-post="{% url 'visor:edit' filename %}"
+        hx-target="#modal"
+        hx-swap="innerHTML"
+        class="space-y-4"
+      >
+        {% csrf_token %}
+        <div class="container-fluid">
+          {% bootstrap_field form.title size='sm' %}
+          {% bootstrap_field form.author size='sm' %}
+          <div class="row g-2">
+            <div class="col-6">
+              {% bootstrap_field form.year size='sm' %}
+            </div>
+            <div class="col-6">
+              {% bootstrap_field form.material size='sm' %}
+            </div>
+          </div>
+          {% bootstrap_field form.museum size='sm' %}
+          <div class="mb-3">
+            {% bootstrap_field form.tags size='sm' %}
+          </div>
+          {% bootstrap_field form.description rows=5 size='sm' %}
+          {% bootstrap_field form.source placeholder='https://example.com' size='sm' %}
+        </div>
+
+        <div class="flex justify-end space-x-3 pt-6">
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            onclick="closeModal()"
+          >Cancel</button>
+
+          <button
+            type="submit"
+            class="btn btn-success"
+          >Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function closeModal() {
+    const modal = document.getElementById("modal");
+    if (modal) {
+      modal.innerHTML = '';
+      modal.classList.add("hidden");
+    }
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeModal();
+    }
+  });
+</script>

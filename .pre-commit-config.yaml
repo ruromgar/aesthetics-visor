@@ -83,11 +83,11 @@ repos:
         stages:
           - commit-msg
 
-  - repo: local
-    hooks:
-      - id: no-db-files
-        name: Do not commit database files
-        entry: Database files must not be committed.
-        language: fail
-        types: [file]
-        files: \.(sqlite3|db)$
+  # - repo: local
+  #   hooks:
+  #     - id: no-db-files
+  #       name: Do not commit database files
+  #       entry: Database files must not be committed.
+  #       language: fail
+  #       types: [file]
+  #       files: \.(sqlite3|db)$

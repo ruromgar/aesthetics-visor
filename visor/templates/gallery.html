@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Gallery - Aesthetics{% endblock %}
+
+{% block content %}
+  <h1 class="text-3xl font-semibold mb-6 text-center">✨ Aesthetics Catalog</h1>
+
+  <div class="flex justify-end mb-4 gap-2">
+    <button hx-get="?mode=list" hx-target="#gallery-wrapper" hx-swap="outerHTML" class="btn btn-outline-secondary btn-sm">
+      📝 List
+    </button>
+    <button hx-get="?mode=grid" hx-target="#gallery-wrapper" hx-swap="outerHTML" class="btn btn-outline-secondary btn-sm">
+      🟦 Grid
+    </button>
+  </div>
+
+  <div id="gallery-wrapper">
+    {% if mode == "list" %}
+      <ul class="list-group">
+        {% for file in files %}
+          <li class="list-group-item d-flex align-items-center gap-3">
+            <img src="{{ MEDIA_URL }}{{ file.name }}" class="rounded" style="width:40px;height:40px;object-fit:cover;"/>
+            <span class="flex-grow-1">{{ file.name }}</span>
+            <button hx-get="{% url 'visor:edit' file.name %}" hx-target="#modal" hx-swap="innerHTML" class="btn btn-sm {% if file.name in existing %}btn-outline-primary{% else %}btn-success{% endif %}">
+              {% if file.name in existing %}✏️ Edit{% else %}➕ Add{% endif %}
+            </button>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {% for file in files %}
+          <div class="rounded shadow bg-white p-2 flex flex-col">
+            <img src="{{ MEDIA_URL }}{{ file.name }}" alt="{{ file.name }}" class="aspect-square object-cover rounded">
+            <button hx-get="{% url 'visor:edit' file.name %}" hx-target="#modal" hx-swap="innerHTML" class="mt-3 py-1.5 rounded bg-indigo-600 hover:bg-indigo-700 text-white text-sm transition">
+              {% if file.name in existing %}✏️ Edit{% else %}➕ Add metadata{% endif %}
+            </button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+
+  <div id="modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center"></div>
+
+  <script>
+    document.body.addEventListener("htmx:afterOnLoad", (evt) => {
+      if (evt.detail.target.id === "modal") {
+        if (evt.detail.xhr.responseText === "OK") return;
+        const modal = document.getElementById('modal');
+        if (modal) {
+          modal.classList.remove('hidden');
+        }
+      }
+    });
+
+    document.body.addEventListener("htmx:afterSwap", (evt) => {
+      if (
+        evt.detail.target.id === "modal" &&
+        evt.detail.xhr.status === 200 &&
+        evt.detail.xhr.responseText === "OK"
+      ) {
+        const modal = document.getElementById("modal");
+        if (modal) {
+          modal.classList.add("hidden");
+          modal.innerHTML = "";
+        }
+      }
+    });
+  </script>
+{% endblock %}

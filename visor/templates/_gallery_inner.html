@@ -1,19 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Gallery - Aesthetics{% endblock %}
 
 {% block content %}
-  <h1 class="text-3xl font-semibold mb-6 text-center">✨ Aesthetics Catalog</h1>
-
-  <div class="flex justify-end mb-4 gap-2">
-    <button hx-get="?mode=list" hx-target="#gallery-wrapper" hx-swap="outerHTML" class="btn btn-outline-secondary btn-sm">
-      📝 List
-    </button>
-    <button hx-get="?mode=grid" hx-target="#gallery-wrapper" hx-swap="outerHTML" class="btn btn-outline-secondary btn-sm">
-      🟦 Grid
-    </button>
-  </div>
-
   <div id="gallery-wrapper">
     {% if mode == "list" %}
       <ul class="list-group">
